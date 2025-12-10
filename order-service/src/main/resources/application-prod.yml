@@ -1,0 +1,8 @@
+slack:
+  webhook:
+    url: ${SLACK_WEBHOOK_URL_PROD:https://hooks.slack.com/services/PROD/WEBHOOK/URL}
+
+management:
+  tracing:
+    sampling:
+      probability: 0.1  # Sample 10% in production

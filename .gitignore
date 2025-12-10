@@ -1,0 +1,63 @@
+# Gradle
+.gradle/
+build/
+*.jar
+*.war
+*.ear
+gradle-8.5-bin.zip
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.iml
+*.iws
+*.ipr
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Maven
+target/
+.mvn/
+
+# Node (if applicable)
+node_modules/
+npm-debug.log
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Docker
+docker-compose.override.yml
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+.tmp/
+
+# Database
+*.db
+*.sqlite
+
+# IDE specific files
+.classpath
+.project
+.settings/
+
+# IntelliJ
+out/
+
+# Spring Boot
+application-local.properties
+application-local.yml

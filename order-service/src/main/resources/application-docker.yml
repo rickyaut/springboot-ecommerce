@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres-order:5432/orderdb
+  kafka:
+    bootstrap-servers: kafka:9092
+
+slack:
+  webhook:
+    url: ${SLACK_WEBHOOK_URL:}
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+    zipkin:
+      endpoint: http://zipkin:9411/api/v2/spans

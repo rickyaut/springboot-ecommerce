@@ -1,0 +1,5 @@
+FROM amazoncorretto:17-alpine
+WORKDIR /app
+COPY erp-service/build/libs/erp-service-1.0.0.jar app.jar
+EXPOSE 8082
+ENTRYPOINT ["java", "-jar", "app.jar"]

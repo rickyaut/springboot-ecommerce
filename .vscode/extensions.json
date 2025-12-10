@@ -1,0 +1,23 @@
+{
+  "extensions": {
+    "recommendations": [
+      "vscjava.extension-pack-for-java",
+      "vmware.vscode-spring-boot",
+      "vscjava.vscode-spring-boot-dashboard",
+      "ms-azuretools.vscode-docker",
+      "eamodio.gitlens",
+      "ms-vscode.makefile-tools",
+      "redhat.vscode-yaml"
+    ]
+  },
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "spring-boot.ls.java.home": null,
+  "[java]": {
+    "editor.defaultFormatter": "redhat.java",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "java.test.defaultConfig": "junit5"
+}

@@ -1,0 +1,18 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none      # Use Flyway for schema management
+    show-sql: false       # Disable SQL logging in production
+  flyway:
+    enabled: true
+    clean-disabled: true  # Prevent accidental data loss in production
+
+logging:
+  level:
+    root: WARN
+    com.ecommerce: INFO   # Less verbose logging in production
+
+management:
+  tracing:
+    sampling:
+      probability: 0.1    # Sample only 10% of requests in production
