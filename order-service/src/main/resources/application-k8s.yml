@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres-order:5432/orderdb
+  kafka:
+    bootstrap-servers: kafka:9092
+
+vault:
+  uri: ${VAULT_URI:http://vault:8200}
+  token: ${VAULT_TOKEN:myroot}
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans

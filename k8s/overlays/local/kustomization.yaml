@@ -1,21 +1,44 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: default
-
 resources:
-  - ../../base
+- ../../base
+
+replicas:
+- name: order-service
+  count: 1
+- name: payment-service
+  count: 1
+- name: erp-service
+  count: 1
 
 images:
-  - name: order-service
-    newName: order-service
-    newTag: latest
-  - name: payment-service
-    newName: payment-service
-    newTag: latest
-  - name: erp-service
-    newName: erp-service
-    newTag: latest
+- name: order-service
+  newTag: latest
+- name: payment-service
+  newTag: latest
+- name: erp-service
+  newTag: latest
 
-patchesStrategicMerge:
-  - service-patches.yaml
+patches:
+- patch: |
+    - op: add
+      path: /spec/template/spec/containers/0/imagePullPolicy
+      value: Never
+  target:
+    kind: Deployment
+    name: order-service
+- patch: |
+    - op: add
+      path: /spec/template/spec/containers/0/imagePullPolicy
+      value: Never
+  target:
+    kind: Deployment
+    name: payment-service
+- patch: |
+    - op: add
+      path: /spec/template/spec/containers/0/imagePullPolicy
+      value: Never
+  target:
+    kind: Deployment
+    name: erp-service

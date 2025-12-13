@@ -2,8 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: order-service
+  namespace: ecommerce
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: order-service
@@ -22,6 +23,14 @@ spec:
           value: "jdbc:postgresql://postgres-order:5432/orderdb"
         - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
           value: "kafka:9092"
+        - name: SPRING_PROFILES_ACTIVE
+          value: "k8s"
+        - name: VAULT_URI
+          value: "http://vault:8200"
+        - name: VAULT_TOKEN
+          value: "myroot"
+        - name: JAVA_OPTS
+          value: "-Xms256m -Xmx512m -XX:+UseG1GC -XX:+UseStringDeduplication"
         resources:
           requests:
             memory: "512Mi"
@@ -29,11 +38,18 @@ spec:
           limits:
             memory: "1Gi"
             cpu: "500m"
+        startupProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 15
+          timeoutSeconds: 10
+          failureThreshold: 20
         livenessProbe:
           httpGet:
             path: /actuator/health/liveness
             port: 8080
-          initialDelaySeconds: 30
           periodSeconds: 10
           timeoutSeconds: 5
           failureThreshold: 3
@@ -41,7 +57,6 @@ spec:
           httpGet:
             path: /actuator/health/readiness
             port: 8080
-          initialDelaySeconds: 10
           periodSeconds: 5
           timeoutSeconds: 3
           failureThreshold: 3
@@ -50,6 +65,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: order-service
+  namespace: ecommerce
 spec:
   selector:
     app: order-service

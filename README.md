@@ -71,7 +71,7 @@ common/
 
 ## Quick Start
 
-### Local Development (Docker Compose)
+### Local Development (Docker Compose) - Recommended
 ```bash
 # Copy environment template and configure secrets (optional)
 cp .env.example .env
@@ -97,6 +97,26 @@ curl http://localhost:8080/actuator/health
 # Kafka: localhost:9092
 # Zipkin: http://localhost:9411
 # Vault UI: http://localhost:8200 (token: myroot)
+```
+
+### Local Kubernetes Development
+```bash
+# Build Docker images
+./build.sh
+
+# Deploy to local Kubernetes (Docker Desktop/minikube)
+./deploy-local.sh
+
+# Services accessible via port-forward:
+# Order Service: http://localhost:8080
+# Vault UI: http://localhost:8200 (token: myroot)
+# Zipkin: http://localhost:9411
+
+# Stop port forwarding
+pkill -f "kubectl port-forward"
+
+# Clean up
+kubectl delete -k k8s/overlays/local
 ```
 
 ### Build and Test
@@ -350,50 +370,55 @@ curl -X POST http://localhost:8080/auth/token \
   -d '{"username":"user"}'
 ```
 
-### Kubernetes Deployment
+### EKS/Production Deployment
 
 **Prerequisites:**
-- Kubernetes cluster (Docker Desktop, minikube, or cloud provider)
-- kubectl configured
-- Docker images built locally or pushed to registry
+- EKS cluster configured
+- kubectl configured for EKS
+- Docker images pushed to ECR or container registry
+- AWS Load Balancer Controller installed
 
-**Local Deployment:**
+**Deploy to EKS:**
 ```bash
-# Build Docker images first
-./build.sh
+# Update registry and version in deploy-eks.sh
+REGISTRY="123456789012.dkr.ecr.us-west-2.amazonaws.com"
+VERSION="v1.0.0"
 
-# Deploy to local Kubernetes
-kubectl apply -k k8s/overlays/local
+# Push images to ECR
+aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin $REGISTRY
+docker tag order-service:latest $REGISTRY/order-service:$VERSION
+docker push $REGISTRY/order-service:$VERSION
+# Repeat for payment-service and erp-service
 
-# Check deployment status
-kubectl get pods -n ecommerce
+# Deploy to EKS
+./deploy-eks.sh
 
-# Access services
-# Order Service: http://localhost:30080
-# Vault UI: http://localhost:30200 (token: myroot)
-# Zipkin: http://localhost:30411
-```
-
-**Production Deployment:**
-```bash
-# Update image registry in k8s/overlays/production/kustomization.yaml
-# Push images to your registry
-
-# Deploy to production
-kubectl apply -k k8s/overlays/production
-
-# Monitor deployment
-kubectl get pods -n ecommerce
-kubectl logs -f deployment/order-service -n ecommerce
+# Get external URLs
+kubectl get svc -n ecommerce
 ```
 
 **Features:**
-- **Vault Integration**: Automatic secret initialization with database credentials
-- **Health Checks**: Liveness and readiness probes for all services
-- **Resource Limits**: CPU and memory limits for optimal resource usage
-- **Service Discovery**: Internal DNS resolution between services
-- **Horizontal Scaling**: Multiple replicas for order, payment, and ERP services
-- **Observability**: Zipkin tracing and health endpoints
+- **LoadBalancer Services**: External access via AWS ALB/NLB
+- **Horizontal Scaling**: 3 replicas for order/payment, 2 for ERP
+- **Health Checks**: Liveness and readiness probes
+- **Resource Limits**: Production-ready CPU and memory limits
+- **Vault Integration**: Automatic secret management
+- **Observability**: Zipkin tracing and metrics
+
+**Troubleshooting:**
+```bash
+# Check pod status
+kubectl get pods -n ecommerce
+
+# View logs
+kubectl logs -f deployment/order-service -n ecommerce
+
+# Check LoadBalancer status
+kubectl get svc order-service -n ecommerce
+
+# Clean up
+kubectl delete -k k8s/overlays/production
+```
 
 ## API Usage
 
@@ -414,7 +439,26 @@ curl -X POST http://localhost:8080/auth/token \
 # Use the token from step 1
 TOKEN="your-jwt-token-here"
 
+# Docker Compose (recommended)
 curl -X POST http://localhost:8080/orders \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{
+    "customerId": "customer-123",
+    "amount": 99.99
+  }'
+
+# Kubernetes (local with port-forward)
+curl -X POST http://localhost:8080/orders \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{
+    "customerId": "customer-123",
+    "amount": 99.99
+  }'
+
+# EKS (replace with actual LoadBalancer URL)
+curl -X POST http://a1b2c3d4-123456789.us-west-2.elb.amazonaws.com:8080/orders \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{
